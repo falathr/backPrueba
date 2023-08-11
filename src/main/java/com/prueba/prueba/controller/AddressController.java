@@ -42,7 +42,7 @@ public class AddressController {
             BeanUtils.copyProperties(updatedPrueba, existingPrueba, "id");
             return addressRepository.save(existingPrueba);
         } else {
-            return null; // Manejo de error si el registro no se encuentra
+            return null;
         }
     }
 
