@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,7 +28,10 @@ import com.prueba.prueba.repository.PersonaRepository;
 import com.prueba.prueba.repository.ProfesorRepository;
 import com.prueba.prueba.request.PersonRequest;
 
-@CrossOrigin(origins = { "*" }, methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
+import jakarta.validation.Valid;
+
+@CrossOrigin(origins = { "*" }, methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 public class PersonController {
     @Autowired
@@ -61,7 +65,14 @@ public class PersonController {
     }
 
     @PostMapping("/personas")
-    public Person agregarDireccion(@RequestBody PersonRequest request) {
+    public String agregarDireccion(@Valid @RequestBody PersonRequest request, BindingResult result) {
+
+        String response = null;
+
+        if (result.hasErrors()) {
+
+            return result.getFieldError().getDefaultMessage();
+        }
         // Buscar a la persona por correo electrónico
         Person existingPerson = personaRepository.findByEmail(request.getEmail());
 
@@ -101,8 +112,8 @@ public class PersonController {
                 profesor.setPersona(savedPerson);
                 profesorRepository.save(profesor);
             }
-
-            return savedPerson;
+            response = "Guardado exitoso";
+            return response;
         } else {
             // Si la persona ya existe, agrega la nueva dirección
             Address address = new Address();
@@ -116,7 +127,8 @@ public class PersonController {
 
             addressRepository.save(address);
 
-            return existingPerson;
+            response = "Guardado exitoso nueva dirección";
+            return response;
         }
     }
 

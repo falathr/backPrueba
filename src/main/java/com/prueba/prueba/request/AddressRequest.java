@@ -1,10 +1,21 @@
 package com.prueba.prueba.request;
 
-public class AddressRequest {
+import java.io.Serializable;
+
+import jakarta.validation.constraints.Pattern;
+
+
+
+public class AddressRequest implements Serializable{
+
     private String street;
+    @Pattern(regexp = "^[a-zA-Z]*$", message = "El campo city debe contener solo letras")
     private String city;
+    @Pattern(regexp = "^[a-zA-Z]*$", message = "El campo state debe contener solo letras")
     private String state;
+    @Pattern(regexp = "^-?[0-9]+$", message = "el postalCode no es valido")
     private String postalCode;
+    @Pattern(regexp = "^[a-zA-Z]*$", message = "El campo country debe contener solo letras")
     private String country;
 
     public String getStreet() {

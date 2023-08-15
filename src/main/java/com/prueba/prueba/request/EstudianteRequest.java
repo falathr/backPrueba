@@ -1,6 +1,9 @@
 package com.prueba.prueba.request;
 
+import jakarta.validation.constraints.Pattern;
+
 public class EstudianteRequest {
+    
     private Integer codigoEstudiante;
     private Double promedio;
 

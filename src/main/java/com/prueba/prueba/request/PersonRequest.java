@@ -1,14 +1,22 @@
 package com.prueba.prueba.request;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+
 public class PersonRequest {
 
+    @Pattern(regexp = "^[a-zA-Z]*$", message = "El campo name debe contener solo letras")
     private String name;
+
     private Integer phoneNumber;
+    @Email(message = "correo invalido")
     private String email;
+
     private Integer tipoRoll;
     private AddressRequest address;
     private ProfesorRequest profesor;
     private EstudianteRequest estudiante;
+
     private Integer activo;
 
     public String getName() {
