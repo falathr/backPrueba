@@ -27,6 +27,7 @@ import com.prueba.prueba.repository.EstudianteRepository;
 import com.prueba.prueba.repository.PersonaRepository;
 import com.prueba.prueba.repository.ProfesorRepository;
 import com.prueba.prueba.request.PersonRequest;
+import com.prueba.prueba.response.salidaResponse;
 
 import jakarta.validation.Valid;
 
@@ -46,32 +47,48 @@ public class PersonController {
     @Autowired
     private EstudianteRepository estudianteRepository;
 
+    // Mapeo para la solicitud GET en la ruta "/personas"
     @GetMapping("/personas")
     public ResponseEntity<List<Person>> getAllPruebas() {
+        // Obtener una lista de personas activas desde el repositorio
         List<Person> personas = personaRepository.findByActivo(1);
+
+        // Devuelve una respuesta con la lista de personas en el cuerpo de la respuesta
+        // y un código de estado 200 (OK)
         return ResponseEntity.ok(personas);
     }
 
+    // Anotación para manejar excepciones de tipo Exception
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception ex) {
-        // Puedes personalizar el mensaje de error y el código de estado aquí
+        // En este método se manejan excepciones de tipo Exception
+
+        // Puede personalizar el mensaje de error y el código de estado aquí
         String errorMessage = "Ocurrió un error en la aplicación.";
+
+        // Devuelve una respuesta con un código de estado 500 (INTERNAL_SERVER_ERROR)
+        // y el mensaje de error personalizado en el cuerpo de la respuesta
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
     }
 
-    @PostMapping
-    public Person createPrueba(@RequestBody Person prueba) {
-        return personaRepository.save(prueba);
-    }
-
+    // Mapeo para la solicitud POST en la ruta "/personas"
     @PostMapping("/personas")
-    public String agregarDireccion(@Valid @RequestBody PersonRequest request, BindingResult result) {
+    public salidaResponse agregarDireccion(@Valid @RequestBody PersonRequest request, BindingResult result) {
+        // Este método se maneja la solicitud POST para agregar una dirección a una
+        // persona
 
-        String response = null;
+        salidaResponse response = new salidaResponse();
+         // Variable para almacenar la respuesta
 
+        // Validar si hay errores en el objeto de solicitud utilizando la anotación
+        // @Valid
+        // y capturar los resultados de la validación en el objeto BindingResult
         if (result.hasErrors()) {
-
-            return result.getFieldError().getDefaultMessage();
+            // Si hay errores, devuelve el mensaje de error predeterminado del primer campo
+            // con error
+            response.setCodigoRespuesta("999");
+            response.setDescripcion(result.getFieldError().getDefaultMessage().toString());
+            return response;
         }
         // Buscar a la persona por correo electrónico
         Person existingPerson = personaRepository.findByEmail(request.getEmail());
@@ -112,7 +129,11 @@ public class PersonController {
                 profesor.setPersona(savedPerson);
                 profesorRepository.save(profesor);
             }
-            response = "Guardado exitoso";
+            
+
+            response.setCodigoRespuesta("000");
+            response.setDescripcion("exitoso");
+            response.setData(savedPerson);
             return response;
         } else {
             // Si la persona ya existe, agrega la nueva dirección
@@ -127,16 +148,24 @@ public class PersonController {
 
             addressRepository.save(address);
 
-            response = "Guardado exitoso nueva dirección";
+            response.setCodigoRespuesta("000");
+            response.setDescripcion("exitoso");
+            response.setData(address);
             return response;
         }
     }
 
+    // Mapeo para la solicitud PUT en la ruta "/personas/{id}"
     @PutMapping("/personas/{id}")
     public Person updatePersonAndAddress(@PathVariable Integer id, @RequestBody Person updatedPerson) {
+        // Este método maneja la solicitud PUT para actualizar una persona
+
+        // Buscar la persona existente en la base de datos utilizando el ID
+        // proporcionado
         Optional<Person> existingPersonOptional = personaRepository.findById(id);
 
         if (existingPersonOptional.isPresent()) {
+            // Si la persona existe en la base de datos
             Person existingPerson = existingPersonOptional.get();
 
             // Actualiza las propiedades de la Person con los valores de updatedPerson
@@ -150,28 +179,37 @@ public class PersonController {
             // Guarda la Person actualizada en la base de datos
             existingPerson = personaRepository.save(existingPerson);
 
+            // Devuelve la Person actualizada
             return existingPerson;
         } else {
-            return null; // Manejo de error si el registro no se encuentra
+            // Si la persona no existe, devuelve null como manejo de error
+            return null;
         }
     }
 
+    // Mapeo para la solicitud DELETE en la ruta "/personas/{id}"
     @DeleteMapping("/personas/{id}")
     public Person deletePrueba(@PathVariable Integer id) {
+        // Este método maneja la solicitud DELETE para marcar una persona como inactiva
+
+        // Buscar la persona existente en la base de datos utilizando el ID
+        // proporcionado
         Optional<Person> existingPersonOptional = personaRepository.findById(id);
 
         if (existingPersonOptional.isPresent()) {
+            // Si la persona existe en la base de datos
             Person existingPerson = existingPersonOptional.get();
 
-            existingPerson.setName(existingPerson.getName());
-            existingPerson.setPhoneNumber(existingPerson.getPhoneNumber());
-            existingPerson.setEmail(existingPerson.getEmail());
+            // Marcar la persona como inactiva
             existingPerson.setActivo(2);
+
+            // Guardar los cambios en la persona en la base de datos
             existingPerson = personaRepository.save(existingPerson);
 
+            // Devolver la instancia de Person actualizada
             return existingPerson;
-
         } else {
+            // Si la persona no existe, devolver null como manejo de error
             return null;
         }
     }
